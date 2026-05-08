@@ -1,0 +1,8 @@
+# Never commit secrets or environment files
+secrets/
+srcs/.env
+
+# OS / Editor
+.DS_Store
+*.swp
+*.swo

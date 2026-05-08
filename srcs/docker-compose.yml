@@ -1,0 +1,79 @@
+version: "3.8"
+
+services:
+
+  # ── NGINX ─────────────────────────────────────────────────────────────────
+  nginx:
+    build: ./requirements/nginx
+    image: nginx
+    container_name: nginx
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - inception
+    restart: unless-stopped
+
+  # ── WordPress + php-fpm ───────────────────────────────────────────────────
+  wordpress:
+    build: ./requirements/wordpress
+    image: wordpress
+    container_name: wordpress
+    depends_on:
+      - mariadb
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - inception
+    env_file: .env
+    secrets:
+      - db_password
+      - credentials
+    restart: unless-stopped
+
+  # ── MariaDB ───────────────────────────────────────────────────────────────
+  mariadb:
+    build: ./requirements/mariadb
+    image: mariadb
+    container_name: mariadb
+    volumes:
+      - mariadb:/var/lib/mysql
+    networks:
+      - inception
+    env_file: .env
+    secrets:
+      - db_password
+      - db_root_password
+    restart: unless-stopped
+
+# ── Named volumes (data persisted on host at /home/joafaust/data) ──────────
+volumes:
+  wordpress:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/joafaust/data/wordpress
+  mariadb:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/joafaust/data/mariadb
+
+# ── Internal bridge network ────────────────────────────────────────────────
+networks:
+  inception:
+    driver: bridge
+
+# ── Docker secrets (plain files on host, mounted read-only into containers) ─
+secrets:
+  db_password:
+    file: ../secrets/db_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  credentials:
+    file: ../secrets/credentials.txt
