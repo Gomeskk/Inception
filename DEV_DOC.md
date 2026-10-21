@@ -23,7 +23,7 @@ git clone <repo-url> Inception && cd Inception
 echo "127.0.0.1  joafaust.42.fr" | sudo tee -a /etc/hosts
 
 # Host folders for the volumes (make also creates them; the parent must be writable)
-sudo mkdir -p /home/joafaust/data && sudo chown -R $USER:$USER /home/joafaust
+sudo mkdir -p /home/joafaust/data && sudo chown -R $USER:$USER /home/joafaust/data
 
 # Secrets (random passwords)
 mkdir -p secrets
