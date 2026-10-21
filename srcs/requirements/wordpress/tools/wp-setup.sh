@@ -13,16 +13,20 @@ mkdir -p "${WP_PATH}"
 # ── First-run setup (skipped on container restart because volume persists) ─
 if [ ! -f "${WP_PATH}/wp-config.php" ]; then
 
-    # 1. Download WordPress core
-    wp core download --path="${WP_PATH}" --allow-root
+    # 1. Download WordPress core (skipped if a previous attempt already did)
+    if [ ! -f "${WP_PATH}/wp-load.php" ]; then
+        wp core download --path="${WP_PATH}" --allow-root
+    fi
 
     # 2. Generate wp-config.php  (no passwords inside the image)
+    #    --skip-check: MariaDB may not be up yet, we wait for it in step 3
     wp config create \
         --path="${WP_PATH}" \
         --dbname="${MYSQL_DATABASE}" \
         --dbuser="${MYSQL_USER}" \
         --dbpass="${DB_PASSWORD}" \
         --dbhost=mariadb \
+        --skip-check \
         --allow-root
 
     # 3. Wait for MariaDB to accept connections
