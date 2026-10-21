@@ -1,11 +1,9 @@
-version: "3.8"
-
 services:
 
   # ── NGINX ─────────────────────────────────────────────────────────────────
   nginx:
     build: ./requirements/nginx
-    image: nginx
+    image: nginx:1.0
     container_name: nginx
     depends_on:
       - wordpress
@@ -20,7 +18,7 @@ services:
   # ── WordPress + php-fpm ───────────────────────────────────────────────────
   wordpress:
     build: ./requirements/wordpress
-    image: wordpress
+    image: wordpress:1.0
     container_name: wordpress
     depends_on:
       - mariadb
@@ -37,7 +35,7 @@ services:
   # ── MariaDB ───────────────────────────────────────────────────────────────
   mariadb:
     build: ./requirements/mariadb
-    image: mariadb
+    image: mariadb:1.0
     container_name: mariadb
     volumes:
       - mariadb:/var/lib/mysql

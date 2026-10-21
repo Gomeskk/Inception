@@ -63,7 +63,7 @@ srcs/requirements/
   wordpress/  Dockerfile, tools/wp-setup.sh
 ```
 
-Each entrypoint script does its first-run setup and then `exec`s the service (`nginx`, `mysqld`, `php-fpm82`) so it runs as PID 1 in the foreground.
+Each entrypoint script does its first-run setup and then `exec`s the service (`nginx`, `mysqld`, `php-fpm83`) so it runs as PID 1 in the foreground.
 
 ## Makefile
 
@@ -84,7 +84,7 @@ $C up -d --build wordpress         # rebuild and restart one service
 $C ps
 $C logs -f mariadb
 $C exec wordpress sh               # shell inside a container
-$C exec mariadb mysql -u root -p   # root password: secrets/db_root_password.txt
+$C exec mariadb mariadb -u root -p   # root password: secrets/db_root_password.txt
 docker network ls                  # srcs_inception
 docker volume inspect srcs_wordpress srcs_mariadb
 ```

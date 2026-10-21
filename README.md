@@ -4,7 +4,7 @@
 
 ## Description
 
-Inception is a small infrastructure built with Docker Compose inside a virtual machine. It runs three services, each in its own container built from `alpine:3.20` with a hand-written Dockerfile:
+Inception is a small infrastructure built with Docker Compose inside a virtual machine. It runs three services, each in its own container built from `alpine:3.23` with a hand-written Dockerfile:
 
 | Service | Role |
 |---------|------|
@@ -18,6 +18,24 @@ Browser ──HTTPS:443──▶ nginx ──FastCGI:9000──▶ wordpress ─
 ```
 
 The website and database data are stored in two named volumes, which keep their data in `/home/joafaust/data/` on the host, so the data survives restarts and reboots. Passwords are passed as Docker secrets and never stored in an image or in git.
+
+## Project description
+
+### Use of Docker
+
+Each service has its own Dockerfile, which starts from `alpine:3.23` (the penultimate stable Alpine), installs only that service's packages, and ends by running the service in the foreground as PID 1. No ready-made images are pulled. `docker compose` builds the three images (named `nginx`, `wordpress` and `mariadb`, the same as their services, and tagged `1.0`), creates the network, volumes and secrets, and starts the containers with `restart: unless-stopped` so they come back after a crash. The Makefile is the single entry point: `make` runs `docker compose up -d --build`.
+
+### Sources included
+
+| Path | Purpose |
+|------|---------|
+| `Makefile` | Creates the host data folders and drives `docker compose` |
+| `srcs/docker-compose.yml` | Services, named volumes, the `inception` network and secrets |
+| `srcs/.env` (not in git) | Non-secret settings: domain, database name, usernames |
+| `secrets/` (not in git) | Database and WordPress passwords |
+| `srcs/requirements/nginx/` | Dockerfile (generates the self-signed TLS certificate) and `conf/nginx.conf` (TLSv1.2/1.3 only, FastCGI to `wordpress:9000`) |
+| `srcs/requirements/mariadb/` | Dockerfile, `conf/50-server.cnf` (listen on 3306), `tools/db-setup.sh` (creates the database, user and root password on first run, then `exec mysqld`) |
+| `srcs/requirements/wordpress/` | Dockerfile (PHP 8.3, php-fpm, WP-CLI) and `tools/wp-setup.sh` (downloads, configures and installs WordPress and creates the two users on first run, then `exec php-fpm83`) |
 
 ### Design choices
 
@@ -80,7 +98,5 @@ See [USER_DOC.md](USER_DOC.md) for day-to-day usage and [DEV_DOC.md](DEV_DOC.md)
 
 AI (Claude) was used as an assistant for:
 - **Debugging the first run.** It found three bugs from the container logs: PHP's 128M memory limit was too small for `wp core download`; Alpine's `mariadb-server.cnf` set `skip-networking` and overrode our config; and `mariadb-client` was missing, so `wp db check` could never succeed.
-- **Setting up the VM.** It wrote the commands for installing Docker, the hosts entry and the data folders.
-- **Documentation.** It drafted this README, USER_DOC.md and DEV_DOC.md.
 
 Every change was reviewed, tested on the VM and understood before being kept.

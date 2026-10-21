@@ -31,7 +31,14 @@ if [ ! -f "${WP_PATH}/wp-config.php" ]; then
 
     # 3. Wait for MariaDB to accept connections
     echo "Waiting for MariaDB to be ready..."
+    #    Bounded: after 60 tries we exit and Docker's restart policy retries
+    tries=0
     until wp db check --path="${WP_PATH}" --allow-root 2>/dev/null; do
+        tries=$((tries + 1))
+        if [ "$tries" -ge 60 ]; then
+            echo "MariaDB not reachable after 120s, exiting" >&2
+            exit 1
+        fi
         sleep 2
     done
 
@@ -60,4 +67,4 @@ if [ ! -f "${WP_PATH}/wp-config.php" ]; then
 fi
 
 # ── Start php-fpm as PID 1 (exec replaces this shell) ─────────────────────
-exec php-fpm82 -F
+exec php-fpm83 -F

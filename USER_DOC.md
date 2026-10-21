@@ -61,7 +61,7 @@ make ps                                                   # 3 containers "Up"
 docker logs wordpress | tail                              # ends with "Success: Created user 2." on first run
 openssl s_client -connect joafaust.42.fr:443 -tls1_2 </dev/null 2>/dev/null | grep Protocol   # TLSv1.2
 docker exec wordpress wp user list --allow-root --path=/var/www/html                          # 2 users
-docker exec -it mariadb mysql -u wpuser -p wordpress -e 'SHOW TABLES;'                        # password: secrets/db_password.txt
+docker exec -it mariadb mariadb -u wpuser -p wordpress -e 'SHOW TABLES;'                        # password: secrets/db_password.txt
 ```
 
 If the site doesn't load, check `make ps` and then `make logs` to see which container is failing.

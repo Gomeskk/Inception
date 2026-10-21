@@ -1,5 +1,5 @@
 # Penultimate stable Alpine
-FROM alpine:3.20
+FROM alpine:3.23
 
 RUN apk update && apk add --no-cache nginx openssl
 
@@ -15,5 +15,5 @@ COPY conf/nginx.conf /etc/nginx/http.d/default.conf
 
 EXPOSE 443
 
-# Run nginx in foreground as PID 1 (no daemon, no tail -f)
+# Run nginx in the foreground as PID 1 (daemon off)
 CMD ["nginx", "-g", "daemon off;"]

@@ -262,7 +262,7 @@ Paths are relative to the `docker-compose.yml` file, so `../secrets/` points to 
 ### Dockerfile
 
 ```
-FROM alpine:3.20
+FROM alpine:3.23
 RUN apk add nginx openssl
 RUN openssl req -x509 ...   # generates self-signed TLS cert at build time
 COPY conf/nginx.conf ...
@@ -270,7 +270,7 @@ CMD ["nginx", "-g", "daemon off;"]
 ```
 
 Key points:
-- Base image is **Alpine 3.20** (penultimate stable at time of writing — not `latest`).
+- Base image is **Alpine 3.23** (penultimate stable at time of writing — not `latest`).
 - `openssl` generates a self-signed certificate during the image build. In a real deployment you would replace this with a cert from Let's Encrypt or your CA.
 - `daemon off;` makes nginx run in the **foreground** as PID 1. Without this nginx would fork into the background and the container would immediately exit. No `tail -f` or infinite loops are used.
 
@@ -306,7 +306,7 @@ Port 80 is intentionally not exposed — the subject says port 443 is the only e
 ### Dockerfile
 
 ```
-FROM alpine:3.20
+FROM alpine:3.23
 RUN apk add mariadb mariadb-client
 COPY conf/50-server.cnf /etc/my.cnf.d/
 COPY tools/db-setup.sh /usr/local/bin/
@@ -358,9 +358,9 @@ The `if` guard is essential: on every restart after the first, `/var/lib/mysql/m
 ### Dockerfile
 
 ```
-FROM alpine:3.20
-RUN apk add php82 php82-fpm php82-mysqli ... wget
-RUN ln -sf /usr/bin/php82 /usr/bin/php     # WP-CLI needs 'php' in PATH
+FROM alpine:3.23
+RUN apk add php83 php83-fpm php83-mysqli ... wget
+RUN ln -sf /usr/bin/php83 /usr/bin/php     # WP-CLI needs 'php' in PATH
 RUN sed -i 's/listen = .*/listen = 9000/'  # php-fpm listens on all interfaces
 RUN wget .../wp-cli.phar -O /usr/local/bin/wp  # WP-CLI for automated install
 COPY tools/wp-setup.sh ...
@@ -398,7 +398,7 @@ if [ ! -f "/var/www/html/wp-config.php" ]; then
 fi
 
 # 3. Start php-fpm as PID 1
-exec php-fpm82 -F
+exec php-fpm83 -F
 ```
 
 The `-F` flag runs php-fpm in the foreground. Same principle as nginx `daemon off;` — keeps the process as PID 1.
@@ -431,7 +431,7 @@ docker compose up
   │     └─ wp-setup.sh runs
   │          └─ polls "wp db check" in a loop until MariaDB accepts connections
   │          └─ installs WordPress, creates users
-  │          └─ exec php-fpm82 -F  →  php-fpm is now PID 1
+  │          └─ exec php-fpm83 -F  →  php-fpm is now PID 1
   │
   └─ starts nginx after wordpress (depends_on: wordpress)
         └─ nginx -g "daemon off;"  →  nginx is PID 1
@@ -450,7 +450,7 @@ docker compose up
 | Makefile at root | `Makefile` — calls `docker compose -f srcs/docker-compose.yml` |
 | Build images with docker-compose | `up --build` in Makefile; no pre-built images pulled |
 | NGINX with TLSv1.2/1.3 only | `ssl_protocols TLSv1.2 TLSv1.3;` in nginx.conf |
-| WordPress + php-fpm only (no nginx) | WordPress container runs only php-fpm82 |
+| WordPress + php-fpm only (no nginx) | WordPress container runs only php-fpm83 |
 | MariaDB only (no nginx) | MariaDB container runs only mysqld |
 | Named volumes for WP files + DB | `driver: local` volumes in docker-compose |
 | Volumes stored in `/home/joafaust/data` | `device:` paths in volume driver_opts |
@@ -459,7 +459,7 @@ docker compose up
 | No `tail -f` / infinite loops | All entrypoints end with `exec <daemon>` |
 | No `network: host` or `--link` | Custom bridge only |
 | Two WP users, admin ≠ admin/administrator | `joafaust42` (admin) + `joafaust` (author) |
-| No `latest` tag | `alpine:3.20` everywhere |
+| No `latest` tag | `alpine:3.23` everywhere, own images tagged `:1.0` |
 | No passwords in Dockerfiles | All passwords read from `/run/secrets/` at runtime |
 | `.env` for environment variables | `srcs/.env` + `env_file:` in docker-compose |
 | Docker secrets for credentials | `secrets:` block in docker-compose; files in `secrets/` |
