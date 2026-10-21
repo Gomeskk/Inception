@@ -96,7 +96,7 @@ See [USER_DOC.md](USER_DOC.md) for day-to-day usage and [DEV_DOC.md](DEV_DOC.md)
 
 ### How AI was used
 
-AI (Claude) was used as an assistant for:
+AI was used as an assistant for:
 - **Debugging the first run.** It found three bugs from the container logs: PHP's 128M memory limit was too small for `wp core download`; Alpine's `mariadb-server.cnf` set `skip-networking` and overrode our config; and `mariadb-client` was missing, so `wp db check` could never succeed.
 
 Every change was reviewed, tested on the VM and understood before being kept.
